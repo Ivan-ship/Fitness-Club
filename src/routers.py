@@ -1,9 +1,14 @@
 from fastapi import APIRouter
 from sqlalchemy import select
 from config.database.db_helper import db_helper
-from src.schemas.client_schema import ClientRead, UpdateClients, ClientCreate
-from src.schemas.clients import Clients
+from src.schemas.client_schema import (
+    ClientRead, 
+    UpdateClients, 
+    ClientCreate
+    )
+from src.schemas.clients import Clients, MembershiTypes
 from sqlalchemy import update, delete
+from src.schemas.membership_types import Mem_type
 
 def get_router():
     router = APIRouter()
@@ -59,4 +64,15 @@ def get_router():
             await session.execute(smt)
             await session.commit()
             return{"message": "Delete Client"}
+    
+    #MT
+    @router.get("/memberships", response_model=list[Mem_type])
+    async def get_memtype():
+        async with db_helper.session_factory() as session:
+            result = await session.execute(
+                select(MembershiTypes)
+            )
+
+            member = result.scalars().all()
+            return member
     return router
